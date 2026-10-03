@@ -1,0 +1,15 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: Lint scripts
+        run: python -m py_compile train_unsloth_mira.py dataset_prep.py nvidia_nemo_example.py
