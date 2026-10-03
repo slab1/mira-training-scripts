@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  mira-nemo-train:
+    image: nvcr.io/nvidia/nemo/llm:24.10
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    command: bash -c "pip install -r requirements_nemo.txt && python nvidia_nemo_example.py"
