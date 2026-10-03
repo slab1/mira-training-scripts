@@ -1,0 +1,5 @@
+nemo_toolkit[llm]==24.10
+torch==2.2.0
+transformers==4.44.0
+accelerate==0.32.0
+datasets==2.19.0
