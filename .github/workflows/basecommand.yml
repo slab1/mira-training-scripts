@@ -1,0 +1,28 @@
+name: Nvidia Base Command Training
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'data/**'
+      - 'nvidia_nemo_example.py'
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Base Command CLI
+        run: pip install base-command
+      - name: Login to Base Command
+        env:
+          BC_API_KEY: ${{ secrets.BC_API_KEY }}
+        run: bc login --api-key $BC_API_KEY
+      - name: Submit training job
+        run: |
+          bc job submit \
+            --name mira-nemo-train \
+            --config nvidia_nemo_example.py \
+            --gpus 1 \
+            --image nvcr.io/nvidia/nemo/llm:24.10
+      - name: Upload artifacts to Hub
+        run: |
+          huggingface-cli upload Hoodx/mira-agent-instinct mira-nemo-finetuned/ --repo-type model
