@@ -31,3 +31,63 @@ jobs:
               print("pushed", f)
           print("dataset pushed OK")
           EOF
+  start-autotrain:
+    needs: push-dataset
+    runs-on: ubuntu-latest
+    env:
+      AUTOTRAIN_API_URL: ${{ secrets.AUTOTRAIN_API_URL }}
+    steps:
+      - name: Check AutoTrain API configured
+        run: |
+          if [ -z "$AUTOTRAIN_API_URL" ]; then
+            echo "AUTOTRAIN_API_URL not set - skipping job start."
+            echo "To enable: duplicate https://huggingface.co/spaces/autotrain-projects/autotrain-advanced,"
+            echo "then add the Space URL (e.g. https://YOUR-SPACE.hf.space) as a repo secret named AUTOTRAIN_API_URL"
+            exit 0
+          fi
+          echo "AutoTrain API found, creating job"
+      - name: Create AutoTrain job
+        if: env.AUTOTRAIN_API_URL != ''
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python - <<'EOF'
+          import json, os, urllib.request
+          payload = {
+              "username": "Hoodx",
+              "project_name": "mira-agent-instinct",
+              "task": "llm:sft",
+              "base_model": "Qwen/Qwen3-8B",
+              "hub_dataset": "Hoodx/mira-dataset",
+              "train_split": "train",
+              "hardware": "spaces-a10g-large",
+              "column_mapping": {"text_column": "text"},
+              "params": {
+                  "block_size": 1024,
+                  "model_max_length": 1024,
+                  "epochs": 3,
+                  "batch_size": 1,
+                  "lr": 0.0002,
+                  "peft": True,
+                  "quantization": "int4",
+                  "target_modules": "all-linear",
+                  "gradient_accumulation": 8,
+                  "mixed_precision": "fp16",
+                  "chat_template": "chatml",
+              },
+          }
+          req = urllib.request.Request(
+              os.environ["AUTOTRAIN_API_URL"].rstrip("/") + "/api/create_project",
+              data=json.dumps(payload).encode(),
+              headers={"Content-Type": "application/json",
+                       "Authorization": "Bearer " + os.environ["HF_TOKEN"]},
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(req, timeout=60) as r:
+                  print(r.status, r.read().decode()[:2000])
+          except urllib.error.HTTPError as e:
+              print("HTTP", e.code, e.read().decode()[:2000])
+              raise
+          print("AutoTrain job submitted")
+          EOF
