@@ -8,15 +8,26 @@ on:
 jobs:
   train:
     runs-on: ubuntu-latest
+    env:
+      BC_API_KEY: ${{ secrets.BC_API_KEY }}
     steps:
+      - name: Check for Base Command key
+        run: |
+          if [ -z "$BC_API_KEY" ]; then
+            echo "BC_API_KEY secret not set - skipping training job (set it in repo Settings > Secrets)"
+            exit 0
+          fi
+          echo "BC_API_KEY present, training will submit"
       - uses: actions/checkout@v4
+        if: env.BC_API_KEY != ''
       - name: Install Base Command CLI
-        run: pip install base-command
+        if: env.BC_API_KEY != ''
+        run: pip install -q base-command
       - name: Login to Base Command
-        env:
-          BC_API_KEY: ${{ secrets.BC_API_KEY }}
-        run: bc login --api-key $BC_API_KEY
+        if: env.BC_API_KEY != ''
+        run: bc login --api-key "$BC_API_KEY"
       - name: Submit training job
+        if: env.BC_API_KEY != ''
         run: |
           bc job submit \
             --name mira-nemo-train \
@@ -24,5 +35,9 @@ jobs:
             --gpus 1 \
             --image nvcr.io/nvidia/nemo/llm:24.10
       - name: Upload artifacts to Hub
+        if: env.BC_API_KEY != ''
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          huggingface-cli upload Hoodx/mira-agent-instinct mira-nemo-finetuned/ --repo-type model
+          python -m pip install -q -U huggingface_hub
+          python -c "from huggingface_hub import HfApi; import os; HfApi(token=os.environ['HF_TOKEN']).upload_folder(folder_path='mira-nemo-finetuned', repo_id='Hoodx/mira-agent-instinct', repo_type='model')"
