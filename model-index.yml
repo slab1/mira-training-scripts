@@ -1,0 +1,14 @@
+- name: mira-agent-instinct
+  results:
+  - task:
+      type: text-generation
+      name: Text Generation
+    dataset:
+      type: Hoodx/mira-dataset
+      name: Mira Dataset
+      config: default
+      split: train
+    metrics:
+    - type: perplexity
+      value: null
+      name: Perplexity
