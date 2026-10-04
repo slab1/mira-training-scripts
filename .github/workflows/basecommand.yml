@@ -1,5 +1,6 @@
 name: Nvidia Base Command Training
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
