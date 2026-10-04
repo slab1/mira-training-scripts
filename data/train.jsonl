@@ -1,0 +1,3 @@
+{"text": "<|im_start|>user\nHello, who are you?<|im_end|>\n<|im_start|>assistant\nI am Mira, an AI agent assistant.<|im_end|>"}
+{"text": "<|im_start|>user\nSummarize the following: Artificial intelligence is transforming industries.<|im_end|>\n<|im_start|>assistant\nAI is transforming industries by automating tasks and enabling new capabilities.<|im_end|>"}
+{"text": "<|im_start|>user\nTranslate to French: Good morning<|im_end|>\n<|im_start|>assistant\nBonjour<|im_end|>"}
