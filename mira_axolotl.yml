@@ -1,0 +1,25 @@
+base_model: unsloth/Qwen3-8B-unsloth-bnb-4bit
+model_type: Qwen3ForCausalLM
+chat_template: qwen3
+adapter: qlora
+load_in_4bit: true
+datasets:
+  - path: data/train_axolotl.jsonl
+    type: json
+    field: messages
+    split: train
+sequence_len: 2048
+micro_batch_size: 2
+gradient_accumulation_steps: 4
+learning_rate: 2e-4
+num_epochs: 3
+warmup_steps: 100
+logging_steps: 10
+eval_steps: 200
+eval_dataset_size: 128
+save_steps: 500
+output_dir: outputs/mira-axolotl
+hub_model_id: Hoodx/mira-agent-instinct-axolotl
+hub_strategy: checkpoint
+wandb_project: mira
+wandb_entity: Hoodx
