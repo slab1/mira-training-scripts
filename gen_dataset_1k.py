@@ -19,58 +19,55 @@ TOPICS = [
     "gradient checkpointing", "mixed precision", "ZeRO optimizer", "FSDP",
 ]
 
-INSTR_TEMPLATES = [
-    "Explain {topic} in two sentences.",
-    "What is the first thing to check when {topic} fails?",
-    "List three best practices for {topic}.",
-    "How does {topic} relate to agent safety?",
-    "Write a one-line summary of {topic}.",
-    "What should an agent do before modifying {topic}?",
-    "Explain {topic} to a beginner.",
-    "Name two common mistakes with {topic}.",
-    "How would you debug a problem with {topic}?",
-    "What are the trade-offs of {topic}?",
-    "When should you NOT use {topic}?",
-    "Describe a real-world use case for {topic}.",
-    "What metrics would you track for {topic}?",
-    "How does {topic} scale with model size?",
-    "What is the biggest risk with {topic}?",
-    "How do you test {topic}?",
-    "What is the difference between {topic} and its alternatives?",
-    "How does {topic} affect inference latency?",
-    "What hardware is best for {topic}?",
-    "How do you monitor {topic} in production?",
-]
-
-ANS_TEMPLATES = [
-    "{topic} is a key concept in modern AI systems. It enables more efficient and reliable operation by structuring how components interact.",
-    "Check the logs and error messages first. Then verify inputs, dependencies, and environment configuration before changing code.",
-    "1) Start with a clear specification. 2) Test incrementally. 3) Document decisions and rollback plans.",
-    "{topic} must be designed with guardrails: allowlists, audit logs, and human confirmation for irreversible actions.",
-    "{topic} is the practice of structuring AI systems for reliability, safety, and verifiable improvement.",
-    "Verify authorization, show the planned change, require explicit confirmation, and take a backup or checkpoint.",
-    "Think of {topic} as a set of rules that keep a complex system predictable. It trades some flexibility for reliability and safety.",
-    "1) Skipping validation. 2) Ignoring edge cases and failure modes.",
-    "Reproduce the issue with minimal input, check logs, isolate the failing component, and verify the fix with a test.",
-    "The main trade-off is between speed and quality: faster approaches often sacrifice accuracy or safety.",
-    "Avoid {topic} when the task is simple, the data is scarce, or the risk of failure is high.",
-    "A common use case is in production LLM serving, where {topic} reduces latency and improves throughput.",
-    "Track latency, throughput, error rate, and resource utilization.",
-    "{topic} typically scales sub-linearly with model size due to memory bandwidth limits.",
-    "The biggest risk is silent failure: the system appears to work but produces degraded output.",
-    "Write unit tests for edge cases, integration tests for the full pipeline, and load tests for performance.",
-    "{topic} differs from alternatives in its focus on efficiency and safety rather than raw capability.",
-    "{topic} can reduce latency by 2-10x depending on the workload and hardware.",
-    "GPUs with high memory bandwidth (A100, H100) are best for {topic}.",
-    "Monitor with Prometheus/Grafana, set alerts on error rate and latency, and log all inputs/outputs.",
+TEMPLATE_PAIRS = [
+    ("Explain {topic} in two sentences.",
+     "{topic} is an important concept in modern AI systems. Properly applying it leads to improved efficiency, reliability, and safety."),
+    ("What is the first thing to check when {topic} fails?",
+     "When {topic} encounters an issue, first inspect the error logs and environment configurations. Isolate the root cause before attempting fixes."),
+    ("List three best practices for {topic}.",
+     "1) Define clear goals and requirements. 2) Test changes incrementally and validate results. 3) Maintain complete documentation and rollback mechanisms."),
+    ("How does {topic} relate to agent safety?",
+     "Safety in {topic} requires strict validation, access controls, audit logging, and human approval for critical operations."),
+    ("Write a one-line summary of {topic}.",
+     "{topic} focuses on enhancing system predictability, performance, and verifiable operation."),
+    ("What should an agent do before modifying {topic}?",
+     "Before making modifications to {topic}, verify permissions, summarize planned changes, and take a backup or snapshot."),
+    ("Explain {topic} to a beginner.",
+     "{topic} is a technique or system designed to keep AI workflows running smoothly and safely. It balances efficiency with control."),
+    ("Name two common mistakes with {topic}.",
+     "1) Skipping input and output validation. 2) Failing to account for edge cases and unexpected failures."),
+    ("How would you debug a problem with {topic}?",
+     "Isolate the failing component with a minimal reproduction case, inspect log traces, apply targeted fixes, and verify with automated tests."),
+    ("What are the trade-offs of {topic}?",
+     "The main trade-off is between resource overhead and system reliability: safeguards and optimizations require initial setup but prevent runtime failures."),
+    ("When should you NOT use {topic}?",
+     "Avoid using {topic} when the overhead outweighs the benefits, or when simpler alternatives satisfy the requirements."),
+    ("Describe a real-world use case for {topic}.",
+     "In production AI agent systems, {topic} ensures operations remain fast, accurate, and resilient under high load."),
+    ("What metrics would you track for {topic}?",
+     "Key metrics include response latency, throughput, error rate, memory utilization, and task success rate."),
+    ("How does {topic} scale with system size?",
+     "As system size increases, {topic} scales by distributing workload and managing resource contention effectively."),
+    ("What is the biggest risk with {topic}?",
+     "The primary risk is misconfiguration leading to degraded performance or unhandled failure modes."),
+    ("How do you test {topic}?",
+     "Use unit tests for core logic, integration tests for component interactions, and stress tests to evaluate performance under load."),
+    ("What is the difference between {topic} and simpler alternatives?",
+     "{topic} provides structured guarantees and scalability, whereas simpler alternatives offer quicker setup at the cost of robustness."),
+    ("How does {topic} affect performance?",
+     "{topic} optimizes resource usage and reduces unnecessary computations, significantly lowering end-to-end latency."),
+    ("What infrastructure is best for {topic}?",
+     "High-performance compute, fast storage, and sufficient memory bandwidth provide the ideal environment for {topic}."),
+    ("How do you monitor {topic} in production?",
+     "Set up telemetry with metrics collection, configure alerting thresholds for anomalies, and maintain detailed audit logs."),
 ]
 
 pairs = []
 for topic in TOPICS:
-    for instr_t, ans_t in zip(INSTR_TEMPLATES, ANS_TEMPLATES):
+    for instr_t, ans_t in TEMPLATE_PAIRS:
         pairs.append((instr_t.format(topic=topic), ans_t.format(topic=topic)))
 
-# add original 16 hand-written examples
+# Original hand-written agent examples
 original = [
     ("Plan a 3-step workflow to research open-source LLM inference engines, then execute step 1.",
      "Step 1 (now): list top 5 engines (vLLM, llama.cpp, SGLang, TensorRT-LLM, TGI) with license, quantization, throughput claims.\nStep 2: compare memory efficiency and serving features in a table.\nStep 3: recommend consumer-GPU vs datacenter picks."),
@@ -106,7 +103,6 @@ original = [
 ]
 pairs.extend(original)
 
-# shuffle for training
 random.shuffle(pairs)
 
 out = Path("data/train.jsonl")
